@@ -14,7 +14,7 @@ function App() {
   const fetchRules = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/rules');
+      const response = await axios.get('https://sf-validation-manager-backend.onrender.com/api/rules');
       setRules(response.data);
     } catch (err) {
       console.error("Fetch failed:", err);
@@ -40,12 +40,12 @@ function App() {
   }, []); // Run once on load
 
   const handleLogin = () => {
-    window.location.href = 'http://localhost:5000/auth/login';
+    window.location.href = 'https://sf-validation-manager-backend.onrender.com/auth/login';
   };
 
   const handleToggle = async (ruleId, currentActive) => {
     try {
-      await axios.post('http://localhost:5000/api/rules/toggle', {
+      await axios.post('https://sf-validation-manager-backend.onrender.com/api/rules/toggle', {
         ruleId: ruleId,
         status: !currentActive
       });
