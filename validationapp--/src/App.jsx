@@ -35,6 +35,8 @@ function App() {
     if (authStatus === 'success') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoggedIn(true);
+
+      window.history.replaceState({}, document.title, window.location.pathname);
       fetchRules(); // This call is now safe because fetchRules is defined above
     }
   }, []); // Run once on load
