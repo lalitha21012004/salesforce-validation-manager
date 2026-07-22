@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const BACKEND_URL = 'https://sf-validation-manager-backend.onrender.com';
+const BACKEND_URL = 'https://sf-validation-backend-3ccd.onrender.com';
 
 function App() {
   const [rules, setRules] = useState([]);
