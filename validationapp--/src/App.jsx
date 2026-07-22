@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+const BACKEND_URL = 'https://sf-validation-manager-backend.onrender.com';
+
 function App() {
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,7 +14,6 @@ function App() {
     return (authStatus === 'success' && token) || !!sessionStorage.getItem('sf_token');
   });
 
-  // Helper function to extract auth configurations safely
   const getAuthHeaders = useCallback(() => {
     const token = sessionStorage.getItem('sf_token');
     const instance = sessionStorage.getItem('sf_instance');
@@ -33,9 +34,8 @@ function App() {
   const fetchRules = useCallback(async () => {
     setLoading(true);
     try {
-      // Pass credentials explicitly inside standard headers
       const response = await axios.get(
-        'https://sf-validation-manager-backend.onrender.com/api/rules',
+        `${BACKEND_URL}/api/rules`,
         getAuthHeaders()
       );
       setRules(response.data);
@@ -55,38 +55,37 @@ function App() {
     const token = urlParams.get('token');
     const instance = urlParams.get('instance');
 
-    // If returning fresh from OAuth login sequence
     if (authStatus === 'success' && token && instance) {
       sessionStorage.setItem('sf_token', token);
       sessionStorage.setItem('sf_instance', instance);
+      setIsLoggedIn(true);
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Delay slightly to guarantee session storage initialization is fully written
       setTimeout(() => fetchRules(), 100);
     } else {
-      // Check if user has an ongoing session already cached locally
       const storedToken = sessionStorage.getItem('sf_token');
       if (storedToken) {
-        // Defer the fetch so state updates happen outside the effect body
         setTimeout(fetchRules, 0);
       }
     }
   }, [fetchRules]);
 
   const handleLogin = () => {
-    window.location.href = 'https://sf-validation-manager-backend.onrender.com/auth/login';
+    window.location.href = `${BACKEND_URL}/auth/login`;
   };
 
   const handleToggle = async (ruleId, currentActive) => {
+    setLoading(true);
     try {
       await axios.post(
-        'https://sf-validation-manager-backend.onrender.com/api/rules/toggle',
+        `${BACKEND_URL}/api/rules/toggle`,
         { ruleId: ruleId, status: !currentActive },
-        getAuthHeaders() // Pass authorization headers
+        getAuthHeaders()
       );
       fetchRules();
-    } catch {
+    } catch (err) {
       alert("Error updating rule status");
+      setLoading(false);
     }
   };
 
@@ -105,10 +104,13 @@ function App() {
       ) : (
         <div style={{ marginTop: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <button onClick={fetchRules} disabled={loading}>
+            <button onClick={fetchRules} disabled={loading} style={btnStyle}>
               {loading ? 'Syncing...' : 'Refresh Rules'}
             </button>
-            <button onClick={handleLogout} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}>
+            <button 
+              onClick={handleLogout} 
+              style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '4px', cursor: 'pointer' }}
+            >
               Disconnect
             </button>
           </div>
@@ -132,7 +134,17 @@ function App() {
                       </span>
                     </td>
                     <td style={cellStyle}>
-                      <button onClick={() => handleToggle(rule.Id, rule.Active)}>
+                      <button 
+                        onClick={() => handleToggle(rule.Id, rule.Active)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: rule.Active ? '#dc3545' : '#28a745',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
                         {rule.Active ? 'Deactivate' : 'Activate'}
                       </button>
                     </td>
@@ -141,7 +153,7 @@ function App() {
               ) : (
                 <tr>
                   <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>
-                    No Account Validation Rules found.
+                    {loading ? 'Loading validation rules...' : 'No Account Validation Rules found.'}
                   </td>
                 </tr>
               )}
