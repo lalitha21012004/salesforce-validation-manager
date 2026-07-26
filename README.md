@@ -6,7 +6,7 @@ A modern React.js web application that connects to Salesforce via OAuth 2.0 and 
 
 ## 🚀 Live Demo
 
-- **Application URL:** [https://salesforce-validation-manager-rho.vercel.app](https://salesforce-validation-manager-rho.vercel.app)
+- **Application URL:** https://salesforce-validation-manager-rho.vercel.app
 
 ---
 
